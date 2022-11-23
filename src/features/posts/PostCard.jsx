@@ -3,12 +3,37 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectUserState } from '../auth/authSlice';
 import { isAuthorized } from '../auth/helpers';
 import EditPost from './EditPost';
-import { deletePost, updatePost } from './postsSlice';
+import { addComment, deletComment, deletePost, updatePost } from './postsSlice';
 
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
     const [showEdit, setShowEdit] = useState(false);
     const { loggedUser } = useSelector(selectUserState);
+
+    const newComment = (e) => {
+        e.preventDefault();
+        const data = {
+            commentData: {
+                content: e.target.comment.value,
+                UserId: loggedUser.id,
+            },
+            token: loggedUser.access_token,
+            id: e.target.id
+        };
+        dispatch(addComment(data));
+        e.target.comment.value = '';
+    };
+
+    const removeCmnt = (e) => {
+        e.preventDefault();
+        const id = e.target.id;
+        const data = {
+            id,
+            token: loggedUser.access_token,
+            postId: post.id
+        };
+        dispatch(deletComment(data));
+    };
     const editPost = (e) => {
         e.preventDefault();
         const data = {
@@ -64,9 +89,9 @@ const PostCard = ({ post }) => {
                                 <p className='px-5 border-y border-black break-all'>{comment.content}</p>
                                 <div className='flex '>
                                     {
-                                        isAuthorized(comment.User.id, loggedUser) &&
+                                        (isAuthorized(comment.UserId, loggedUser)) &&
                                         <form id={comment.id}
-                                        //  onSubmit={deleteComment}
+                                            onSubmit={removeCmnt}
                                         >
                                             <button className='mx-2 text-sm border-y rounded-xl hover:bg-black hover:text-white border-black h-fit'  >delete</button>
                                         </form>
@@ -77,10 +102,10 @@ const PostCard = ({ post }) => {
                         })
                     }
                 </div>
-                {/* <form className='flex flex-col my-3 place-items-center text-center' id={post?.id} onSubmit={addComment}>
-                <input type="text" name='comment' placeholder='comment' className='w-full border-y border-black  my-4' />
-                <button className='border-b-2  border-black shadow-xl hover:bg-action hover:text-purple-200 rounded-xl w-32'>comment</button>
-            </form> */}
+                <form className='flex flex-col my-3 place-items-center text-center' id={post?.id} onSubmit={newComment}>
+                    <input type="text" name='comment' placeholder='comment' className='w-full border-y border-black  my-4' />
+                    <button className='border-b-2  border-black shadow-xl hover:bg-action hover:text-purple-200 rounded-xl w-32'>comment</button>
+                </form>
             </div>
         </>
     );

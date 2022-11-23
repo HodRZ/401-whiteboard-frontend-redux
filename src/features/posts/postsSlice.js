@@ -1,10 +1,43 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
 import axios from '../../config/api';
 
 
 const initialState = {
     posts: []
 };
+
+export const addComment = createAsyncThunk('posts/addComment',
+    async (data) => {
+        const { id, commentData, token } = data;
+        console.log(commentData);
+        const newComment = await axios.post(`/post/${id}/comment`, commentData, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const res = {
+            newCmnt: newComment.data,
+            id
+        };
+        return res;
+    }
+);
+
+export const deletComment = createAsyncThunk('posts/deletComment',
+    async (data) => {
+        const { id, token, postId } = data;
+        await axios.delete(`/comment/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const res = {
+            id,
+            postId
+        };
+        return res;
+    }
+);
 
 export const getAllPosts = createAsyncThunk('posts/getAllPosts',
     async () => {
@@ -99,6 +132,23 @@ export const postsSlice = createSlice({
             })
             .addCase(addPost.fulfilled, (state, action) => {
                 state.posts.push(action.payload);
+            })
+            .addCase(addComment.fulfilled, (state, action) => {
+                const post = state.posts.find(pst => pst.id === Number(action.payload.id));
+                if (post) {
+                    post.comments.push(action.payload.newCmnt);
+                }
+            })
+            .addCase(deletComment.fulfilled, (state, action) => {
+                const post = state.posts.find(pst => pst.id === Number(action.payload.postId));
+                console.log(current(post));
+                if (post) {
+                    post.comments.filter(comment => {
+                        const result = comment.id !== Number(action.payload.id);
+                        console.log(result);
+                        return result;
+                    });
+                }
             });
 
     }
