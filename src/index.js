@@ -6,11 +6,13 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './index.css';
 import { getAllPosts } from './features/posts/postsSlice';
+import { silentLogin } from './features/auth/authSlice';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
 store.dispatch(getAllPosts());
+store.dispatch(silentLogin());
 
 root.render(
   <React.StrictMode>
