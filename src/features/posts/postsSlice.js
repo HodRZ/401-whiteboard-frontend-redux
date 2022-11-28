@@ -128,7 +128,7 @@ export const postsSlice = createSlice({
                     }
                     return post;
                 });
-                state.posts = posts;
+                state.posts = [...posts];
             })
             .addCase(addPost.fulfilled, (state, action) => {
                 state.posts.push(action.payload);

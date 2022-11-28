@@ -56,7 +56,7 @@ export const userSlice = createSlice({
                     ...initialState,
                     isLoading: false
                 };
-                state = newState;
+                return newState;
             })
             .addCase(signUp.fulfilled, (state, action) => {
                 state.loggedUser = action.payload;
